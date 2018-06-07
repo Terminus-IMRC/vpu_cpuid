@@ -1,35 +1,50 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <rpimemmgr.h>
 #include <mailbox.h>
-#include <vc4vec.h>
 
 int main()
 {
-	int mbfd = -1;
-	int s;
+    int err = 0;
+
+    struct rpimemmgr mgr;
+	int mb = -1;
+    uint32_t vpuid;
 
 	const uint8_t code[] = {
 		0xe0, 0x00, /* r0 <- cpuid */
 		0x5a, 0x00 /* branch to link address */
 	};
 	const int code_size = sizeof(code);
-	struct vc4vec_mem code_mem;
+    void *shmem_usr = NULL;
+    uint32_t shmem_bus;
 
-	vc4vec_init();
-	vc4vec_mem_alloc(&code_mem, code_size);
-	memcpy(code_mem.cpu_addr, code, code_size);
+    err = rpimemmgr_init(&mgr);
+    if (err)
+        return err;
 
-	mbfd = xmbox_open();
+    mb = mailbox_open();
+    if (mb < 0)
+        return 1;
 
-	s = execute_code(mbfd, code_mem.gpu_addr, 0, 0, 0, 0, 0, 0);
+    err = rpimemmgr_alloc_vcsm(code_size, 4096, VCSM_CACHE_TYPE_NONE,
+            &shmem_usr, &shmem_bus, &mgr);
+    if (err)
+        return err;
 
-	xmbox_close(mbfd);
+    memcpy(shmem_usr, code, code_size);
 
-	vc4vec_mem_free(&code_mem);
-	vc4vec_finalize();
+	vpuid = mailbox_execute_code(mb, shmem_bus, 0, 0, 0, 0, 0, 0);
+	printf("0x%08x\n", vpuid);
 
-	printf("0x%08x\n", s);
+    err = rpimemmgr_free_by_usraddr(shmem_usr, &mgr);
+    if (err)
+        return err;
 
-	return 0;
+    err = mailbox_close(mb);
+    if (err)
+        return err;
+
+    return rpimemmgr_finalize(&mgr);
 }
