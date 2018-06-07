@@ -1,13 +1,16 @@
 # vpu_cpuid
 
-## Abstract
-This program prints the cpuid of the VideoCore IV VPU on Raspberry Pi.
+Prints the cpuid of the VideoCore IV **VPU** on Raspberry Pi.
 
-## Needed libraries
-You need libvc4vec ( http://github.com/Terminus-IMRC/libvc4vec ) and mailbox ( http://github.com/Terminus-IMRC/mailbox ) to compile this program.
+## Requirements
+You need [librpimemmgr](https://github.com/Idein/librpimemmgr) and
+[mailbox](https://github.com/Terminus-IMRC/mailbox).
 
 ## How to run
-<pre>
+```
+$ git clone https://github.com/Terminus-IMRC/vpu_cpuid.git
+$ cd vpu_cpuid/
+$ cmake .
 $ make
-$ sudo ./main
-</pre>
+$ ./vpuid
+```
