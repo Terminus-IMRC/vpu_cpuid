@@ -2,6 +2,8 @@
 
 Prints the cpuid of the VideoCore IV **VPU** on Raspberry Pi.
 
+See http://imrc.noip.me/blog/vc4/VPUID/ for the results.
+
 ## Requirements
 You need [librpimemmgr](https://github.com/Idein/librpimemmgr) and
 [mailbox](https://github.com/Terminus-IMRC/mailbox).
